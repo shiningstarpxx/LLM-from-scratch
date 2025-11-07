@@ -577,7 +577,8 @@ def visualize_training_performance():
 
     # 创建可视化
     fig, axes = plt.subplots(2, 2, figsize=(15, 12))
-    fig.suptitle('训练性能可视化对比', fontsize=16, fontweight='bold')
+    fig.suptitle('训练性能可视化对比', fontsize=16, fontweight='bold',
+                 fontproperties=get_chinese_font_prop(16))
 
     epoch_range = range(1, epochs + 1)
 
@@ -586,10 +587,11 @@ def visualize_training_performance():
         axes[0, 0].plot(epoch_range, data['train_loss'], linewidth=2, label=name,
                        color=data['color'], alpha=0.8)
 
-    axes[0, 0].set_title('训练损失变化', fontsize=14, fontweight='bold')
+    axes[0, 0].set_title('训练损失变化', fontsize=14, fontweight='bold',
+                         fontproperties=get_chinese_font_prop(14))
     axes[0, 0].set_xlabel('Epoch')
-    axes[0, 0].set_ylabel('损失')
-    axes[0, 0].legend()
+    axes[0, 0].set_ylabel('损失', fontproperties=get_chinese_font_prop())
+    axes[0, 0].legend(prop=get_chinese_font_prop(10))
     axes[0, 0].grid(True, alpha=0.3)
 
     # 2. 验证损失曲线
@@ -597,10 +599,11 @@ def visualize_training_performance():
         axes[0, 1].plot(epoch_range, data['val_loss'], linewidth=2, label=name,
                        color=data['color'], alpha=0.8)
 
-    axes[0, 1].set_title('验证损失变化', fontsize=14, fontweight='bold')
+    axes[0, 1].set_title('验证损失变化', fontsize=14, fontweight='bold',
+                         fontproperties=get_chinese_font_prop(14))
     axes[0, 1].set_xlabel('Epoch')
-    axes[0, 1].set_ylabel('损失')
-    axes[0, 1].legend()
+    axes[0, 1].set_ylabel('损失', fontproperties=get_chinese_font_prop())
+    axes[0, 1].legend(prop=get_chinese_font_prop(10))
     axes[0, 1].grid(True, alpha=0.3)
 
     # 3. 吞吐量对比
@@ -608,10 +611,11 @@ def visualize_training_performance():
         axes[1, 0].plot(epoch_range, data['throughput'], linewidth=2, label=name,
                        color=data['color'], alpha=0.8)
 
-    axes[1, 0].set_title('训练吞吐量', fontsize=14, fontweight='bold')
+    axes[1, 0].set_title('训练吞吐量', fontsize=14, fontweight='bold',
+                         fontproperties=get_chinese_font_prop(14))
     axes[1, 0].set_xlabel('Epoch')
-    axes[1, 0].set_ylabel('样本/秒')
-    axes[1, 0].legend()
+    axes[1, 0].set_ylabel('样本/秒', fontproperties=get_chinese_font_prop())
+    axes[1, 0].legend(prop=get_chinese_font_prop(10))
     axes[1, 0].grid(True, alpha=0.3)
 
     # 4. 最终性能对比雷达图
@@ -646,10 +650,11 @@ def visualize_training_performance():
         ax_radar.fill(angles, scores, alpha=0.25, color=scenarios[name]['color'])
 
     ax_radar.set_xticks(angles[:-1])
-    ax_radar.set_xticklabels(categories)
+    ax_radar.set_xticklabels(categories, fontproperties=get_chinese_font_prop(10))
     ax_radar.set_ylim(0, 1)
-    ax_radar.set_title('综合性能对比', fontsize=14, fontweight='bold', pad=20)
-    ax_radar.legend(loc='upper right', bbox_to_anchor=(1.3, 1.0))
+    ax_radar.set_title('综合性能对比', fontsize=14, fontweight='bold', pad=20,
+                      fontproperties=get_chinese_font_prop(14))
+    ax_radar.legend(loc='upper right', bbox_to_anchor=(1.3, 1.0), prop=get_chinese_font_prop(10))
 
     plt.tight_layout()
     plt.savefig('/Users/peixingxin/code/spring2025-lectures/深度讨论/训练性能可视化.png',
@@ -781,7 +786,8 @@ def demonstrate_mixed_precision_benefits():
 
         # 可视化对比
         fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-        fig.suptitle('混合精度训练效益对比', fontsize=16, fontweight='bold')
+        fig.suptitle('混合精度训练效益对比', fontsize=16, fontweight='bold',
+                     fontproperties=get_chinese_font_prop(16))
 
         # 时间对比
         times = [fp32_time, amp_time]
@@ -789,8 +795,9 @@ def demonstrate_mixed_precision_benefits():
         colors = ['#FF6B6B', '#4ECDC4']
 
         bars = axes[0].bar(labels, times, color=colors, alpha=0.8)
-        axes[0].set_title('训练时间对比 (50 iterations)', fontweight='bold')
-        axes[0].set_ylabel('时间 (秒)')
+        axes[0].set_title('训练时间对比 (50 iterations)', fontweight='bold',
+                         fontproperties=get_chinese_font_prop(14))
+        axes[0].set_ylabel('时间 (秒)', fontproperties=get_chinese_font_prop())
 
         for bar, value in zip(bars, times):
             axes[0].text(bar.get_x() + bar.get_width()/2, bar.get_height() + max(times)*0.01,
@@ -800,8 +807,9 @@ def demonstrate_mixed_precision_benefits():
         memories = [fp32_memory, amp_memory]
 
         bars = axes[1].bar(labels, memories, color=colors, alpha=0.8)
-        axes[1].set_title('内存使用对比', fontweight='bold')
-        axes[1].set_ylabel('内存 (GB)')
+        axes[1].set_title('内存使用对比', fontweight='bold',
+                         fontproperties=get_chinese_font_prop(14))
+        axes[1].set_ylabel('内存 (GB)', fontproperties=get_chinese_font_prop())
 
         for bar, value in zip(bars, memories):
             axes[1].text(bar.get_x() + bar.get_width()/2, bar.get_height() + max(memories)*0.01,
@@ -811,14 +819,18 @@ def demonstrate_mixed_precision_benefits():
         metrics = [f'{speedup:.2f}x', f'{memory_saved:.1f}%']
         metric_labels = ['加速比', '内存节省']
 
-        bars = axes[2].bar(metric_labels, [float(m.rstrip('x%')) for m in metrics],
+        x_pos = np.arange(len(metric_labels))
+        bars = axes[2].bar(x_pos, [float(m.rstrip('x%')) for m in metrics],
                           color=['#45B7D1', '#FFD93D'], alpha=0.8)
-        axes[2].set_title('性能提升指标', fontweight='bold')
-        axes[2].set_ylabel('提升幅度')
+        axes[2].set_title('性能提升指标', fontweight='bold',
+                         fontproperties=get_chinese_font_prop(14))
+        axes[2].set_ylabel('提升幅度', fontproperties=get_chinese_font_prop())
+        axes[2].set_xticks(x_pos)
+        axes[2].set_xticklabels(metric_labels, fontproperties=get_chinese_font_prop())
 
-        for bar, value, label in zip(bars, [float(m.rstrip('x%')) for m in metrics], metrics):
+        for i, (bar, value, label) in enumerate(zip(bars, [float(m.rstrip('x%')) for m in metrics], metrics)):
             axes[2].text(bar.get_x() + bar.get_width()/2, bar.get_height() +
-                        float(metrics[0].rstrip('x%'))*0.01, label,
+                        max([float(m.rstrip('x%')) for m in metrics])*0.01, label,
                         ha='center', va='bottom', fontweight='bold')
 
         plt.tight_layout()
@@ -852,7 +864,8 @@ def create_comprehensive_dashboard():
     fig = plt.figure(figsize=(20, 12))
     gs = fig.add_gridspec(3, 4, hspace=0.3, wspace=0.3)
 
-    fig.suptitle('深度学习模型综合性能仪表板', fontsize=20, fontweight='bold')
+    fig.suptitle('深度学习模型综合性能仪表板', fontsize=20, fontweight='bold',
+                 fontproperties=get_chinese_font_prop(20))
 
     # 1. 参数 vs FLOP 散点图
     ax1 = fig.add_subplot(gs[0, :2])
@@ -863,9 +876,10 @@ def create_comprehensive_dashboard():
         ax1.annotate(name, (params[i], flops[i]), xytext=(5, 5),
                     textcoords='offset points', fontweight='bold')
 
-    ax1.set_xlabel('参数数量 (M)')
+    ax1.set_xlabel('参数数量 (M)', fontproperties=get_chinese_font_prop())
     ax1.set_ylabel('FLOP (GFLOP)')
-    ax1.set_title('模型复杂度分析 (气泡大小=内存, 颜色=精度)', fontweight='bold')
+    ax1.set_title('模型复杂度分析 (气泡大小=内存, 颜色=精度)', fontweight='bold',
+                  fontproperties=get_chinese_font_prop(14))
     plt.colorbar(scatter, ax=ax1, label='精度 (%)')
 
     # 2. 性能指标雷达图
@@ -892,32 +906,36 @@ def create_comprehensive_dashboard():
         ax2.fill(angles, scores, alpha=0.15)
 
     ax2.set_xticks(angles[:-1])
-    ax2.set_xticklabels(categories)
+    ax2.set_xticklabels(categories, fontproperties=get_chinese_font_prop(10))
     ax2.set_ylim(0, 1)
-    ax2.set_title('综合性能雷达图', fontweight='bold', pad=20)
-    ax2.legend(loc='upper right', bbox_to_anchor=(1.3, 1.0))
+    ax2.set_title('综合性能雷达图', fontweight='bold', pad=20,
+                  fontproperties=get_chinese_font_prop(14))
+    ax2.legend(loc='upper right', bbox_to_anchor=(1.3, 1.0), prop=get_chinese_font_prop(10))
 
     # 3. 精度 vs 参数关系
     ax3 = fig.add_subplot(gs[1, 0])
     ax3.plot(params, accuracy, 'o-', linewidth=3, markersize=8, color='#FF6B6B')
-    ax3.set_xlabel('参数数量 (M)')
-    ax3.set_ylabel('精度 (%)')
-    ax3.set_title('精度 vs 参数数量', fontweight='bold')
+    ax3.set_xlabel('参数数量 (M)', fontproperties=get_chinese_font_prop())
+    ax3.set_ylabel('精度 (%)', fontproperties=get_chinese_font_prop())
+    ax3.set_title('精度 vs 参数数量', fontweight='bold',
+                  fontproperties=get_chinese_font_prop(14))
     ax3.grid(True, alpha=0.3)
 
     # 4. 精度 vs FLOP关系
     ax4 = fig.add_subplot(gs[1, 1])
     ax4.plot(flops, accuracy, 'o-', linewidth=3, markersize=8, color='#4ECDC4')
     ax4.set_xlabel('FLOP (GFLOP)')
-    ax4.set_ylabel('精度 (%)')
-    ax4.set_title('精度 vs 计算量', fontweight='bold')
+    ax4.set_ylabel('精度 (%)', fontproperties=get_chinese_font_prop())
+    ax4.set_title('精度 vs 计算量', fontweight='bold',
+                  fontproperties=get_chinese_font_prop(14))
     ax4.grid(True, alpha=0.3)
 
     # 5. 内存使用对比
     ax5 = fig.add_subplot(gs[1, 2])
     bars = ax5.bar(names, memory, color=['#95E77E', '#FFD93D', '#FF6BCB', '#C9B6E5', '#FFB6B9'])
-    ax5.set_title('内存使用对比', fontweight='bold')
-    ax5.set_ylabel('内存 (GB)')
+    ax5.set_title('内存使用对比', fontweight='bold',
+                  fontproperties=get_chinese_font_prop(14))
+    ax5.set_ylabel('内存 (GB)', fontproperties=get_chinese_font_prop())
     ax5.tick_params(axis='x', rotation=45)
 
     for bar, value in zip(bars, memory):
@@ -938,8 +956,9 @@ def create_comprehensive_dashboard():
     sorted_scores = [efficiency_scores[i] for i in sorted_indices]
 
     bars = ax6.barh(sorted_names, sorted_scores, color='#45B7D1', alpha=0.8)
-    ax6.set_title('综合效率排行榜', fontweight='bold')
-    ax6.set_xlabel('效率分数')
+    ax6.set_title('综合效率排行榜', fontweight='bold',
+                  fontproperties=get_chinese_font_prop(14))
+    ax6.set_xlabel('效率分数', fontproperties=get_chinese_font_prop())
 
     # 7. 推荐矩阵 (精度 vs 效率)
     ax7 = fig.add_subplot(gs[2, :2])
@@ -956,10 +975,11 @@ def create_comprehensive_dashboard():
     ax7.axhline(y=np.mean(accuracy), color='gray', linestyle='--', alpha=0.5, label='平均精度')
     ax7.axvline(x=np.mean(efficiency_scores), color='gray', linestyle='--', alpha=0.5, label='平均效率')
 
-    ax7.set_xlabel('效率分数')
-    ax7.set_ylabel('精度 (%)')
-    ax7.set_title('模型选择推荐矩阵', fontweight='bold')
-    ax7.legend()
+    ax7.set_xlabel('效率分数', fontproperties=get_chinese_font_prop())
+    ax7.set_ylabel('精度 (%)', fontproperties=get_chinese_font_prop())
+    ax7.set_title('模型选择推荐矩阵', fontweight='bold',
+                  fontproperties=get_chinese_font_prop(14))
+    ax7.legend(prop=get_chinese_font_prop(10))
     ax7.grid(True, alpha=0.3)
 
     # 8. 关键洞察文本
