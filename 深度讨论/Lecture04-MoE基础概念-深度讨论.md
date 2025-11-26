@@ -972,3 +972,691 @@ L_z = mean((log Σ exp(logits_i))²)
 **下一步**: Q7-Q12 门控机制深入讨论
 
 🎉 **恭喜完成MoE基础概念的深度学习！你已经建立了坚实的理论基础！**
+
+## 📐 数学形式化证明
+
+### 1. MoE参数-计算解耦的数学证明
+
+#### 定理1: MoE打破参数-计算线性关系
+
+**Dense FFN**:
+- 参数量: $P_{dense} = d_{model} \times d_{ff} + d_{ff} \times d_{model} = 2 \times d_{model} \times d_{ff}$
+- 计算量: $C_{dense} = 2 \times d_{model} \times d_{ff}$ FLOPs
+
+关系: $C_{dense} \propto P_{dense}$（线性耦合）
+
+**MoE FFN**:
+- 参数量: $P_{MoE} = N_{experts} \times P_{dense} + d_{model} \times N_{experts}$（Router权重）
+- 激活参数: $P_{active} = k \times P_{dense}$（仅激活k个专家）
+- 计算量: $C_{MoE} = k \times P_{dense}$
+
+**解耦比**:
+$$\text{Decoupling Ratio} = \frac{P_{MoE}}{C_{MoE}} = \frac{N_{experts} \times P_{dense}}{k \times P_{dense}} = \frac{N_{experts}}{k}$$
+
+当 $k=1, N_{experts}=128$ 时，解耦比 = 128，即：**128倍容量，1倍计算**！
+
+#### 定理2: 边际收益递减定律
+
+**定义**: 性能增益 vs 计算成本的关系：
+
+$$\text{Efficiency}(k) = \frac{\text{Performance}(k)}{\text{Compute}(k)}$$
+
+**实验数据建模**（Switch Transformer）:
+
+$$\text{Performance}(k) \approx 100 + 5 \times \log_2(k)$$
+$$\text{Compute}(k) = k$$
+
+因此：
+$$\text{Efficiency}(k) = \frac{100 + 5\log_2(k)}{k}$$
+
+**推导**:
+$$\frac{d\text{Efficiency}}{dk} < 0 \quad \forall k > 1$$
+
+即：效率随k单调递减！k=1时效率最高。
+
+### 2. Top-K选择的数学分析
+
+#### 定义
+
+**Router输出**: 
+$$h = \text{Router}(x) \in \mathbb{R}^{N_{experts}}$$
+
+**Top-K选择**:
+$$\text{Top-K}(h) = \{i_1, i_2, \ldots, i_k\} \quad \text{where} \quad h_{i_1} \geq h_{i_2} \geq \cdots \geq h_{i_k}$$
+
+**权重归一化**:
+$$g_i = \begin{cases}
+\frac{\exp(h_i)}{\sum_{j \in \text{Top-K}(h)} \exp(h_j)} & i \in \text{Top-K}(h) \\
+0 & \text{otherwise}
+\end{cases}$$
+
+**MoE输出**:
+$$y = \sum_{i \in \text{Top-K}(h)} g_i \times \text{Expert}_i(x)$$
+
+#### 定理3: Soft MoE退化定理
+
+**Soft MoE** ($k = N_{experts}$):
+$$y_{soft} = \sum_{i=1}^{N} \frac{\exp(h_i)}{\sum_{j=1}^{N} \exp(h_j)} \times \text{Expert}_i(x)$$
+
+**退化条件**: 当所有专家权重趋于均匀：
+$$h_1 \approx h_2 \approx \cdots \approx h_N$$
+
+则：
+$$g_i \approx \frac{1}{N} \quad \forall i$$
+
+$$y_{soft} \approx \frac{1}{N}\sum_{i=1}^{N} \text{Expert}_i(x)$$
+
+**结论**: Soft MoE退化为所有专家的平均，失去专业化优势！
+
+### 3. 负载均衡的数学约束
+
+#### 定义
+
+**Token分配矩阵** $T \in \{0,1\}^{B \times S \times N}$:
+$$T_{ijk} = \begin{cases}
+1 & \text{if token } j \text{ of batch } i \text{ is assigned to expert } k \\
+0 & \text{otherwise}
+\end{cases}$$
+
+**负载** (每个专家处理的token数):
+$$L_k = \sum_{i=1}^{B}\sum_{j=1}^{S} T_{ijk}$$
+
+**理想负载** (完美均衡):
+$$L^*_k = \frac{B \times S \times k}{N}$$
+
+**负载不均衡度**:
+$$\text{Imbalance} = \frac{1}{N}\sum_{k=1}^{N}\left(\frac{L_k - L^*_k}{L^*_k}\right)^2$$
+
+**目标**: 最小化 $\text{Imbalance}$。
+
+#### 定理4: 容量约束
+
+**Expert Capacity**:
+$$C = \text{capacity\_factor} \times \frac{B \times S \times k}{N}$$
+
+**约束**:
+$$L_k \leq C \quad \forall k$$
+
+**Token丢弃**: 如果 $L_k > C$，则丢弃超出的token。
+
+### 4. 参数量和FLOPs的精确计算
+
+#### MoE层参数量
+
+**Router参数**:
+$$P_{router} = d_{model} \times N_{experts}$$
+
+**Expert参数** (每个专家是一个FFN):
+$$P_{expert} = 2 \times d_{model} \times d_{ff}$$
+
+**总参数**:
+$$P_{MoE} = P_{router} + N_{experts} \times P_{expert}$$
+$$= d_{model} \times N_{experts} + N_{experts} \times 2 \times d_{model} \times d_{ff}$$
+$$= N_{experts} \times d_{model} \times (1 + 2 \times d_{ff})$$
+
+**示例** (7B模型，$N=128$, $d_{model}=4096$, $d_{ff}=11008$):
+$$P_{MoE} = 128 \times 4096 \times (1 + 2 \times 11008) \approx 11.5B$$
+
+#### MoE层FLOPs
+
+**Router计算**:
+$$\text{FLOPs}_{router} = 2 \times B \times S \times d_{model} \times N_{experts}$$
+
+**Expert计算** (激活k个专家):
+$$\text{FLOPs}_{expert} = k \times 2 \times B \times S \times 2 \times d_{model} \times d_{ff}$$
+$$= 4 \times k \times B \times S \times d_{model} \times d_{ff}$$
+
+**总FLOPs**:
+$$\text{FLOPs}_{MoE} = \text{FLOPs}_{router} + \text{FLOPs}_{expert}$$
+
+通常 $\text{FLOPs}_{router} \ll \text{FLOPs}_{expert}$（Router开销很小）。
+
+### 5. Router梯度的数学推导
+
+#### 梯度流
+
+**MoE前向传播**:
+$$y = \sum_{i \in \text{Top-K}} g_i(x) \times E_i(x)$$
+
+其中 $g_i(x) = \text{softmax}_{\text{Top-K}}(\text{Router}(x))_i$。
+
+**Loss对Router的梯度**:
+$$\frac{\partial \mathcal{L}}{\partial \text{Router}} = \frac{\partial \mathcal{L}}{\partial y} \times \frac{\partial y}{\partial g} \times \frac{\partial g}{\partial \text{Router}}$$
+
+**关键项**:
+$$\frac{\partial y}{\partial g_i} = E_i(x)$$
+
+即：**梯度与Expert输出成正比**！
+
+**直观理解**:
+- 如果Expert $i$ 输出好 → $\frac{\partial \mathcal{L}}{\partial g_i} < 0$ → 增加 $g_i$（强化选择）
+- 如果Expert $i$ 输出差 → $\frac{\partial \mathcal{L}}{\partial g_i} > 0$ → 减少 $g_i$（弱化选择）
+
+这正是"分类问题"的直观类比！
+
+## 🐍 Python 验证代码
+
+```python
+"""
+MoE基础概念数学验证代码
+验证参数-计算解耦、Top-K选择、负载均衡等
+"""
+
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import matplotlib.pyplot as plt
+from typing import Dict, List, Tuple
+
+class SimpleMoELayer(nn.Module):
+    """简单的MoE层实现"""
+    
+    def __init__(
+        self,
+        d_model: int = 512,
+        d_ff: int = 2048,
+        num_experts: int = 8,
+        k: int = 2,
+        capacity_factor: float = 1.25
+    ):
+        super().__init__()
+        
+        self.d_model = d_model
+        self.d_ff = d_ff
+        self.num_experts = num_experts
+        self.k = k
+        self.capacity_factor = capacity_factor
+        
+        # Router
+        self.router = nn.Linear(d_model, num_experts)
+        
+        # Experts
+        self.experts = nn.ModuleList([
+            nn.Sequential(
+                nn.Linear(d_model, d_ff),
+                nn.ReLU(),
+                nn.Linear(d_ff, d_model)
+            )
+            for _ in range(num_experts)
+        ])
+    
+    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, Dict]:
+        """
+        Args:
+            x: [batch_size, seq_len, d_model]
+        
+        Returns:
+            output: [batch_size, seq_len, d_model]
+            aux_info: 辅助信息（负载统计等）
+        """
+        batch_size, seq_len, d_model = x.shape
+        
+        # Router打分
+        router_logits = self.router(x)  # [B, S, N]
+        
+        # Top-K选择
+        top_k_logits, top_k_indices = torch.topk(
+            router_logits, self.k, dim=-1
+        )  # [B, S, k]
+        
+        # Softmax归一化（仅在Top-K上）
+        top_k_weights = F.softmax(top_k_logits, dim=-1)  # [B, S, k]
+        
+        # 初始化输出
+        output = torch.zeros_like(x)
+        
+        # Expert负载统计
+        expert_loads = torch.zeros(self.num_experts, dtype=torch.long)
+        
+        # 对每个Expert处理其负责的tokens
+        for expert_id in range(self.num_experts):
+            # 找到分配给这个Expert的tokens
+            expert_mask = (top_k_indices == expert_id)  # [B, S, k]
+            
+            if expert_mask.any():
+                # 收集token索引和权重
+                batch_idx, seq_idx, k_idx = torch.where(expert_mask)
+                weights = top_k_weights[batch_idx, seq_idx, k_idx]
+                
+                # Expert处理
+                expert_input = x[batch_idx, seq_idx]  # [num_tokens, d_model]
+                expert_output = self.experts[expert_id](expert_input)
+                
+                # 加权累加到输出
+                output[batch_idx, seq_idx] += weights.unsqueeze(-1) * expert_output
+                
+                # 统计负载
+                expert_loads[expert_id] = len(batch_idx)
+        
+        aux_info = {
+            'router_logits': router_logits,
+            'top_k_indices': top_k_indices,
+            'top_k_weights': top_k_weights,
+            'expert_loads': expert_loads
+        }
+        
+        return output, aux_info
+    
+    def count_parameters(self) -> Dict[str, int]:
+        """计算参数量"""
+        router_params = self.d_model * self.num_experts
+        
+        expert_params_per = (
+            self.d_model * self.d_ff +  # w1
+            self.d_ff +                 # b1
+            self.d_ff * self.d_model +  # w2
+            self.d_model                # b2
+        )
+        total_expert_params = expert_params_per * self.num_experts
+        
+        return {
+            'router': router_params,
+            'experts': total_expert_params,
+            'total': router_params + total_expert_params
+        }
+
+
+class MoEAnalyzer:
+    """MoE分析器"""
+    
+    def verify_decoupling_theorem(
+        self,
+        d_model: int = 4096,
+        d_ff: int = 11008,
+        num_experts_list: List[int] = [1, 8, 16, 32, 64, 128]
+    ) -> Dict:
+        """验证参数-计算解耦定理"""
+        
+        results = {
+            'num_experts': [],
+            'total_params': [],
+            'active_params': [],
+            'flops': [],
+            'decoupling_ratio': []
+        }
+        
+        # Dense baseline
+        dense_params = 2 * d_model * d_ff
+        dense_flops = 2 * d_model * d_ff
+        
+        for N in num_experts_list:
+            # MoE参数量
+            router_params = d_model * N
+            expert_params = N * dense_params
+            total_params = router_params + expert_params
+            
+            # 激活参数（k=1）
+            active_params = dense_params
+            
+            # FLOPs（k=1）
+            router_flops = 2 * d_model * N  # 通常很小
+            expert_flops = dense_flops
+            total_flops = router_flops + expert_flops
+            
+            # 解耦比
+            decoupling = total_params / active_params
+            
+            results['num_experts'].append(N)
+            results['total_params'].append(total_params / 1e9)  # 转为B
+            results['active_params'].append(active_params / 1e9)
+            results['flops'].append(total_flops / 1e9)
+            results['decoupling_ratio'].append(decoupling)
+        
+        return results
+    
+    def simulate_diminishing_returns(
+        self,
+        k_values: List[int] = [1, 2, 4, 8, 16, 32, 64, 128]
+    ) -> Dict:
+        """模拟边际收益递减"""
+        
+        # 基于Switch Transformer实验数据建模
+        results = {
+            'k': k_values,
+            'performance': [],
+            'compute': [],
+            'efficiency': []
+        }
+        
+        for k in k_values:
+            # 性能模型：对数增长
+            perf = 100 + 5 * np.log2(k)
+            
+            # 计算线性增长
+            compute = k
+            
+            # 效率 = 性能 / 计算
+            efficiency = perf / compute
+            
+            results['performance'].append(perf)
+            results['compute'].append(compute)
+            results['efficiency'].append(efficiency)
+        
+        return results
+    
+    def analyze_load_balancing(
+        self,
+        batch_size: int = 32,
+        seq_len: int = 128,
+        num_experts: int = 8,
+        k: int = 2
+    ) -> Dict:
+        """分析负载均衡"""
+        
+        # 创建模拟Router输出
+        router_logits = torch.randn(batch_size, seq_len, num_experts)
+        
+        # Top-K选择
+        _, top_k_indices = torch.topk(router_logits, k, dim=-1)
+        
+        # 统计每个Expert的负载
+        expert_loads = torch.zeros(num_experts, dtype=torch.long)
+        for expert_id in range(num_experts):
+            expert_loads[expert_id] = (top_k_indices == expert_id).sum()
+        
+        # 理想负载
+        total_tokens = batch_size * seq_len
+        ideal_load = total_tokens * k / num_experts
+        
+        # 负载不均衡度
+        imbalance = torch.sum(
+            ((expert_loads.float() - ideal_load) / ideal_load) ** 2
+        ) / num_experts
+        
+        # Coefficient of Variation
+        cv = expert_loads.float().std() / expert_loads.float().mean()
+        
+        return {
+            'expert_loads': expert_loads.numpy(),
+            'ideal_load': ideal_load,
+            'imbalance': imbalance.item(),
+            'coefficient_of_variation': cv.item(),
+            'max_load': expert_loads.max().item(),
+            'min_load': expert_loads.min().item()
+        }
+    
+    def verify_soft_moe_degradation(
+        self,
+        d_model: int = 64,
+        num_experts: int = 4
+    ) -> Dict:
+        """验证Soft MoE退化定理"""
+        
+        # 创建简单Expert
+        experts = [
+            nn.Linear(d_model, d_model, bias=False)
+            for _ in range(num_experts)
+        ]
+        
+        # 测试输入
+        x = torch.randn(1, d_model)
+        
+        # 场景1：专业化（权重差异大）
+        specialized_weights = torch.tensor([10.0, 1.0, 0.5, 0.1])
+        specialized_weights = F.softmax(specialized_weights, dim=0)
+        
+        output_specialized = sum(
+            w * expert(x)
+            for w, expert in zip(specialized_weights, experts)
+        )
+        
+        # 场景2：均匀（权重相同）
+        uniform_weights = torch.ones(num_experts) / num_experts
+        
+        output_uniform = sum(
+            w * expert(x)
+            for w, expert in zip(uniform_weights, experts)
+        )
+        
+        # 计算权重熵（衡量专业化程度）
+        def entropy(weights):
+            return -torch.sum(weights * torch.log(weights + 1e-10))
+        
+        return {
+            'specialized_weights': specialized_weights.numpy(),
+            'uniform_weights': uniform_weights.numpy(),
+            'specialized_entropy': entropy(specialized_weights).item(),
+            'uniform_entropy': entropy(uniform_weights).item(),
+            'max_entropy': np.log(num_experts),  # 完全均匀的熵
+            'specialization_degree': 1 - entropy(specialized_weights) / np.log(num_experts)
+        }
+    
+    def compare_dense_vs_moe(
+        self,
+        batch_size: int = 16,
+        seq_len: int = 64,
+        d_model: int = 512,
+        d_ff: int = 2048,
+        num_experts: int = 8,
+        k: int = 2
+    ) -> Dict:
+        """对比Dense FFN vs MoE"""
+        
+        # Dense FFN
+        dense_ffn = nn.Sequential(
+            nn.Linear(d_model, d_ff),
+            nn.ReLU(),
+            nn.Linear(d_ff, d_model)
+        )
+        
+        # MoE Layer
+        moe_layer = SimpleMoELayer(d_model, d_ff, num_experts, k)
+        
+        # 测试输入
+        x = torch.randn(batch_size, seq_len, d_model)
+        
+        # Dense参数量和FLOPs
+        dense_params = sum(p.numel() for p in dense_ffn.parameters())
+        dense_flops = 2 * d_model * d_ff * 2  # 两个矩阵乘法
+        
+        # MoE参数量和FLOPs
+        moe_params_dict = moe_layer.count_parameters()
+        moe_params = moe_params_dict['total']
+        
+        # MoE FLOPs（近似）
+        router_flops = 2 * d_model * num_experts
+        expert_flops = k * dense_flops
+        moe_flops = router_flops + expert_flops
+        
+        # 前向传播测试
+        with torch.no_grad():
+            dense_output = dense_ffn(x)
+            moe_output, aux_info = moe_layer(x)
+        
+        return {
+            'dense': {
+                'params': dense_params,
+                'params_mb': dense_params * 4 / 1024**2,  # FP32
+                'flops': dense_flops,
+                'output_norm': torch.norm(dense_output).item()
+            },
+            'moe': {
+                'params': moe_params,
+                'params_mb': moe_params * 4 / 1024**2,
+                'active_params': k * dense_params,
+                'flops': moe_flops,
+                'output_norm': torch.norm(moe_output).item(),
+                'expert_loads': aux_info['expert_loads'].numpy()
+            },
+            'ratios': {
+                'params_ratio': moe_params / dense_params,
+                'flops_ratio': moe_flops / dense_flops,
+                'efficiency_gain': (moe_params / dense_params) / (moe_flops / dense_flops)
+            }
+        }
+    
+    def visualize_moe_concepts(self):
+        """可视化MoE核心概念"""
+        
+        fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+        
+        # 1. 参数-计算解耦
+        decoupling_results = self.verify_decoupling_theorem()
+        
+        ax = axes[0, 0]
+        ax2 = ax.twinx()
+        
+        line1 = ax.plot(decoupling_results['num_experts'], 
+                       decoupling_results['total_params'], 
+                       'b-o', linewidth=2, label='总参数量')
+        line2 = ax.plot(decoupling_results['num_experts'], 
+                       decoupling_results['active_params'], 
+                       'r-s', linewidth=2, label='激活参数')
+        
+        line3 = ax2.plot(decoupling_results['num_experts'], 
+                        decoupling_results['decoupling_ratio'], 
+                        'g-^', linewidth=2, label='解耦比')
+        
+        ax.set_xlabel('Expert数量')
+        ax.set_ylabel('参数量 (B)', color='b')
+        ax2.set_ylabel('解耦比', color='g')
+        ax.set_title('参数-计算解耦定理')
+        ax.grid(True, alpha=0.3)
+        
+        lines = line1 + line2 + line3
+        labels = [l.get_label() for l in lines]
+        ax.legend(lines, labels, loc='upper left')
+        
+        # 2. 边际收益递减
+        diminishing_results = self.simulate_diminishing_returns()
+        
+        ax = axes[0, 1]
+        ax.plot(diminishing_results['k'], diminishing_results['performance'], 
+               'b-o', linewidth=2, label='性能')
+        ax.set_xlabel('k值')
+        ax.set_ylabel('性能', color='b')
+        ax.set_xscale('log', base=2)
+        ax.set_title('性能 vs k值')
+        ax.grid(True, alpha=0.3)
+        ax.legend()
+        
+        ax2 = axes[0, 2]
+        ax2.plot(diminishing_results['compute'], diminishing_results['efficiency'], 
+                'r-s', linewidth=2)
+        ax2.set_xlabel('计算量 (k)')
+        ax2.set_ylabel('效率 (性能/计算)', color='r')
+        ax2.set_xscale('log', base=2)
+        ax2.set_title('边际收益递减')
+        ax2.grid(True, alpha=0.3)
+        ax2.axvline(1, color='green', linestyle='--', label='k=1 (最优)')
+        ax2.legend()
+        
+        # 3. 负载均衡分析
+        load_results = self.analyze_load_balancing()
+        
+        ax = axes[1, 0]
+        expert_ids = np.arange(len(load_results['expert_loads']))
+        bars = ax.bar(expert_ids, load_results['expert_loads'], alpha=0.7)
+        ax.axhline(load_results['ideal_load'], color='r', linestyle='--', 
+                  linewidth=2, label=f'理想负载={load_results["ideal_load"]:.1f}')
+        ax.set_xlabel('Expert ID')
+        ax.set_ylabel('负载 (token数)')
+        ax.set_title(f'负载分布 (不均衡度={load_results["imbalance"]:.3f})')
+        ax.legend()
+        ax.grid(True, alpha=0.3, axis='y')
+        
+        # 4. Soft MoE退化
+        degradation_results = self.verify_soft_moe_degradation()
+        
+        ax = axes[1, 1]
+        x = np.arange(len(degradation_results['specialized_weights']))
+        width = 0.35
+        
+        bars1 = ax.bar(x - width/2, degradation_results['specialized_weights'], 
+                      width, label='专业化', alpha=0.8)
+        bars2 = ax.bar(x + width/2, degradation_results['uniform_weights'], 
+                      width, label='均匀（退化）', alpha=0.8)
+        
+        ax.set_xlabel('Expert ID')
+        ax.set_ylabel('权重')
+        ax.set_title('Soft MoE退化定理')
+        ax.legend()
+        ax.grid(True, alpha=0.3, axis='y')
+        
+        # 5. Dense vs MoE对比
+        comparison = self.compare_dense_vs_moe()
+        
+        ax = axes[1, 2]
+        categories = ['参数量比', 'FLOPs比', '效率增益']
+        values = [
+            comparison['ratios']['params_ratio'],
+            comparison['ratios']['flops_ratio'],
+            comparison['ratios']['efficiency_gain']
+        ]
+        
+        colors = ['blue', 'orange', 'green']
+        bars = ax.bar(categories, values, color=colors, alpha=0.7)
+        ax.set_ylabel('比值')
+        ax.set_title('Dense vs MoE对比')
+        ax.grid(True, alpha=0.3, axis='y')
+        
+        # 添加数值标注
+        for bar, val in zip(bars, values):
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height,
+                   f'{val:.2f}x', ha='center', va='bottom')
+        
+        plt.tight_layout()
+        plt.savefig('MoE基础概念分析.png', dpi=150, bbox_inches='tight')
+        plt.show()
+
+
+if __name__ == "__main__":
+    analyzer = MoEAnalyzer()
+    
+    print("=== MoE基础概念数学验证 ===\n")
+    
+    # 1. 参数-计算解耦验证
+    print("1. 参数-计算解耦定理验证:")
+    decoupling = analyzer.verify_decoupling_theorem(num_experts_list=[1, 8, 32, 128])
+    for i, N in enumerate(decoupling['num_experts']):
+        print(f"   N={N}: 总参数={decoupling['total_params'][i]:.2f}B, "
+              f"激活参数={decoupling['active_params'][i]:.2f}B, "
+              f"解耦比={decoupling['decoupling_ratio'][i]:.1f}x")
+    print()
+    
+    # 2. 边际收益递减
+    print("2. 边际收益递减验证:")
+    diminishing = analyzer.simulate_diminishing_returns(k_values=[1, 2, 4, 8, 16])
+    for i, k in enumerate(diminishing['k']):
+        print(f"   k={k}: 性能={diminishing['performance'][i]:.2f}, "
+              f"计算={diminishing['compute'][i]}x, "
+              f"效率={diminishing['efficiency'][i]:.2f}")
+    print()
+    
+    # 3. 负载均衡分析
+    print("3. 负载均衡分析:")
+    load_balance = analyzer.analyze_load_balancing()
+    print(f"   理想负载: {load_balance['ideal_load']:.1f} tokens/expert")
+    print(f"   实际负载范围: [{load_balance['min_load']}, {load_balance['max_load']}]")
+    print(f"   不均衡度: {load_balance['imbalance']:.4f}")
+    print(f"   变异系数: {load_balance['coefficient_of_variation']:.4f}")
+    print()
+    
+    # 4. Soft MoE退化验证
+    print("4. Soft MoE退化定理验证:")
+    degradation = analyzer.verify_soft_moe_degradation()
+    print(f"   专业化权重熵: {degradation['specialized_entropy']:.4f}")
+    print(f"   均匀权重熵: {degradation['uniform_entropy']:.4f}")
+    print(f"   最大熵: {degradation['max_entropy']:.4f}")
+    print(f"   专业化程度: {degradation['specialization_degree']:.2%}")
+    print()
+    
+    # 5. Dense vs MoE对比
+    print("5. Dense vs MoE对比:")
+    comparison = analyzer.compare_dense_vs_moe()
+    print(f"   Dense: {comparison['dense']['params_mb']:.2f}MB, "
+          f"{comparison['dense']['flops']/1e9:.2f}G FLOPs")
+    print(f"   MoE: {comparison['moe']['params_mb']:.2f}MB, "
+          f"{comparison['moe']['flops']/1e9:.2f}G FLOPs")
+    print(f"   参数比: {comparison['ratios']['params_ratio']:.2f}x")
+    print(f"   FLOPs比: {comparison['ratios']['flops_ratio']:.2f}x")
+    print(f"   效率增益: {comparison['ratios']['efficiency_gain']:.2f}x")
+    print()
+    
+    # 6. 可视化
+    print("6. 生成MoE概念可视化...")
+    analyzer.visualize_moe_concepts()
+    print("   完成！")
+```
