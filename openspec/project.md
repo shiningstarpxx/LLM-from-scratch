@@ -193,6 +193,98 @@
 
 ---
 
+## 项目整体计划和当前进展
+
+### 学习计划总览 (12周完整课程)
+
+**总体结构**: 6个阶段，17个讲座
+
+#### 第1阶段：基础建立 (第1-2周)
+- **Lecture 01**: Introduction & Tokenization ✅
+- **Lecture 02**: PyTorch Building Blocks & Resource Accounting ✅
+- **Lecture 03**: Transformer Architecture ⏸️
+- **Lecture 04**: Mixture of Experts (MoE) 🔄
+
+#### 第2阶段：硬件与系统 (第3-4周)
+- **Lecture 05**: GPU Architecture
+- **Lecture 06**: Efficient Kernels
+- **Lecture 07**: Model Parallelism
+- **Lecture 08**: Distributed Training
+
+#### 第3阶段：规模与优化 (第5-6周)
+- **Lecture 09**: Scaling Laws
+- **Lecture 10**: Inference Optimization Part 1
+- **Lecture 11**: Inference Optimization Part 2
+
+#### 第4阶段：应用与评估 (第7-8周)
+- **Lecture 12**: Model Evaluation
+- 实践项目和系统整合
+
+#### 第5阶段：数据工程 (第9-10周)
+- **Lecture 13**: Training Data
+- **Lecture 14**: Data Processing & Filtering
+
+#### 第6阶段：高级训练技术 (第11-12周)
+- **Lecture 15**: RLHF (Reinforcement Learning from Human Feedback)
+- **Lecture 16**: RLVR (Reinforcement Learning from Visual Reward)
+- **Lecture 17**: RL for Language Models
+
+---
+
+### 当前进度状态
+
+**当前位置**: 第1阶段 - 基础建立
+**最新完成**: Lecture 04 Q1-Q12 深度讨论 (2025-11-19)
+**整体进度**: 约 20% (2.5/17 讲座)
+
+#### 已完成讲座详情
+
+**Lecture 01 ✅**: Introduction & Tokenization
+- BPE算法深度理解和可视化实现
+- 4种tokenizer对比分析
+- 苏格拉底式深度问答完成
+
+**Lecture 02 ✅**: PyTorch Building Blocks & Resource Accounting
+- 7B模型内存精确计算 (124-172GB)
+- FLOP计算器和资源账务工具
+- 混合精度训练深度分析
+- 24个引导性问题全部完成
+
+**Lecture 03 ⏸️**: Transformer Architecture
+- 部分理论学习完成
+- 待深化实践和问答
+
+**Lecture 04 🔄**: Mixture of Experts (当前重点)
+- **Q1-Q6 ✅**: MoE基础概念 (核心动机、专家本质、门控网络、Top-K必要性、参数量与计算量分析)
+- **Q7-Q12 ✅**: 门控机制深度解析 (2025-11-19完成)
+  - Softmax门控的负载不均衡问题
+  - Noisy Top-K门控机制
+  - 辅助损失的数学原理
+  - Expert Capacity机制
+  - 门控的可微分性 (Straight-Through Estimator)
+  - Router Z-loss深度解析 (完整数学推导、实验验证、PyTorch实现)
+- **Q13-Q18**: 现代MoE架构 (待学习)
+- **Q19-Q24**: 训练与优化 (待学习)
+
+#### 关键技术收获
+1. **MoE稀疏激活原理**: 用1x计算获得128x模型容量的核心机制
+2. **Router Z-loss**: 防止Softmax饱和的约束机制 `L_z = (log Σ exp(logits))²`
+3. **负载均衡策略**: 辅助损失 + Expert Capacity的双重保障机制
+4. **门控梯度流动**: Top-K离散操作的Straight-Through Estimator方法
+5. **专家专业化机制**: Router学习、梯度稀疏性、正反馈循环的系统理解
+
+#### 深度探索方向
+- 流式深度学习架构设计
+- Emergent abilities的几何理论基础
+- 知识蒸馏的信息论极限
+- GPU利用率质量评估体系
+- 系统性能优化与吞吐延迟平衡
+- 数值计算与优化算法前沿
+
+详见: `/深度探索TODO.md`
+
+---
+
 **最后更新**: 2025-11-26
 **维护者**: peixingxin + Claude Code
-**版本**: v1.0
+**版本**: v1.1
