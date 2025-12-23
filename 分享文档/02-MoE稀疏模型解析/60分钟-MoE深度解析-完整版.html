@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoE深度解析 - 60分钟完整版</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1.5cm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'SimHei', sans-serif;
+            font-size: 20px;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+        }
+
+        .page {
+            width: 100%;
+            min-height: 100vh;
+            padding: 30px 50px;
+            page-break-after: always;
+            page-break-inside: avoid;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .page.lead {
+            justify-content: center;
+            text-align: center;
+        }
+
+        h1 {
+            color: #1a5f7a;
+            font-size: 42px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            border-bottom: 4px solid #3498db;
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-size: 30px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 8px;
+            margin: 15px 0 15px 0;
+            font-weight: 500;
+        }
+
+        h3 {
+            color: #34495e;
+            font-size: 26px;
+            margin: 20px 0 15px 0;
+        }
+
+        p {
+            margin: 12px 0;
+            line-height: 1.6;
+            font-size: 18px;
+        }
+
+        strong {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .mermaid-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .mermaid {
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 18px;
+        }
+
+        th {
+            background: #3498db;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid #2980b9;
+        }
+
+        td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .header-info {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media print {
+            .page {
+                page-break-after: always;
+                margin-bottom: 0;
+                box-shadow: none;
+            }
+            
+            .mermaid-container {
+                page-break-inside: avoid;
+            }
+        }
+
+        @media screen {
+            body {
+                background: #f5f5f5;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 封面页 -->
+    <div class="page lead">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h1 style="border: none; font-size: 48px; margin-bottom: 30px;">Mixture of Experts 深度解析</h1>
+        <h2 style="border: none; font-size: 36px; color: #666; margin-top: 20px;">Mermaid图表优化版</h2>
+        <p style="font-size: 28px; margin-top: 50px;"><strong>核心主线</strong>：每个时代解决了什么问题？技术如何一步步演进？</p>
+        <br>
+        <p style="font-size: 24px; color: #888; margin-top: 60px;">分享人：michaelpei | 时长：60分钟 | 2025</p>
+        <div class="page-number">1</div>
+    </div>
+
+    <!-- 议程页 -->
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>议程：以问题驱动的历史视角</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>章节</th>
+                    <th style="text-align: center;">时间</th>
+                    <th>核心问题</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Part 1: 历史演进</strong></td>
+                    <td style="text-align: center;">12min</td>
+                    <td>大模型困境如何催生MoE？</td>
+                </tr>
+                <tr>
+                    <td><strong>Part 2: 数学原理</strong></td>
+                    <td style="text-align: center;">12min</td>
+                    <td>MoE的数学本质是什么？</td>
+                </tr>
+                <tr>
+                    <td><strong>Part 3: 门控机制</strong></td>
+                    <td style="text-align: center;">12min</td>
+                    <td>如何解决专家坍缩和负载均衡？</td>
+                </tr>
+                <tr>
+                    <td><strong>Part 4: 工程实现</strong></td>
+                    <td style="text-align: center;">10min</td>
+                    <td>如何高效实现和分布式训练？</td>
+                </tr>
+                <tr>
+                    <td><strong>Part 5: 现代架构</strong></td>
+                    <td style="text-align: center;">6min</td>
+                    <td>Mixtral和DeepSeek如何设计？</td>
+                </tr>
+                <tr>
+                    <td><strong>Part 6: 总结</strong></td>
+                    <td style="text-align: center;">3min</td>
+                    <td>MoE的本质与未来？</td>
+                </tr>
+                <tr>
+                    <td><strong>Q&A</strong></td>
+                    <td style="text-align: center;">5min</td>
+                    <td>讨论</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="page-number">2</div>
+    </div>
+
+    <!-- Part 1: 历史演进 -->
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h1>Part 1: 历史演进 (12 min)</h1>
+        <div class="page-number">3</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>1.1 MoE技术演进全景图</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+timeline
+    title MoE技术演进时间线
+    section 1991
+        概念诞生 : Jacobs MoE
+        分而治之思想 : 问题计算效率为零
+    section 2017
+        稀疏突破 : Shazeer Sparsely Gated
+        Sparse Gating : Noisy Gating
+        Aux Loss : 解决效率坍缩负载均衡
+    section 2021
+        规模扩展 : Switch Transformer
+        Top-1简化 : Capacity Factor
+        解决万亿参数扩展
+    section 2022
+        训练稳定 : ST-MoE
+        Router Z-Loss : 解决数值稳定性
+    section 2024
+        工业落地 : Mixtral DeepSeek
+        回归Top-2 : 细粒度专家
+        达成效果与效率平衡
+            </div>
+        </div>
+        <p><strong>核心洞察</strong>：每一代技术都是解决前一代遗留问题的产物</p>
+        <div class="page-number">4</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>1.2 大模型的根本困境</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph LR
+    A[参数量增加] --> B[计算量增加]
+    B --> C[训练成本增加]
+    C --> D[推理成本增加]
+
+    subgraph "线性绑定关系"
+        A --> B
+    end
+    
+    E[想要更强] --> F[成本更高]
+    
+    style A fill:#e3f2fd
+    style B fill:#ffebee
+    style C fill:#ffebee
+    style D fill:#ffebee
+    style E fill:#e8f5e9
+    style F fill:#ffebee
+            </div>
+        </div>
+        <p><strong>核心问题</strong>：能否打破这个线性关系？<strong>增加参数但不增加计算？</strong></p>
+        <div class="page-number">5</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>1.3 MoE的答案：稀疏激活</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TB
+    A[输入 x] --> B{Router}
+    B --> C[Expert 1]
+    B --> D[Expert 2]
+    B --> E[...]
+    B --> F[Expert N]
+
+    C --> G[激活 K个专家]
+    D -.-> H[不计算]
+    E -.-> H
+    F -.-> H
+
+    G --> I[加权求和]
+    I --> J[输出 y]
+
+    subgraph "存储全部"
+        C
+        D
+        E
+        F
+    end
+
+    subgraph "计算少量"
+        G
+        I
+        J
+    end
+
+    style C fill:#c8e6c9
+    style D fill:#ffcdd2
+    style E fill:#ffcdd2
+    style F fill:#ffcdd2
+    style G fill:#c8e6c9
+    style I fill:#c8e6c9
+    style J fill:#c8e6c9
+            </div>
+        </div>
+        <p><strong>MoE本质</strong>：用「存储换计算」实现「参数换效果」，打破线性绑定！</p>
+        <div class="page-number">6</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>1.4 1991年：概念诞生</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TD
+    A[输入 x] --> B{Gating Network}
+    B --> C[Expert 1]
+    B --> D[Expert 2]
+    B --> E[Expert 3]
+
+    C --> F[y1]
+    D --> G[y2]
+    E --> H[y3]
+    
+    F --> I[加权求和]
+    G --> I
+    H --> I
+    I --> J[输出 y]
+    
+    subgraph "1991 Jacobs架构"
+        B
+        C
+        D
+        E
+        F
+        G
+        H
+        I
+    end
+    
+    style C fill:#ffcdd2
+    style D fill:#ffcdd2
+    style E fill:#ffcdd2
+    style F fill:#ffcdd2
+    style G fill:#ffcdd2
+    style H fill:#ffcdd2
+            </div>
+        </div>
+        <p><strong>问题</strong>：所有专家都计算，完全没有效率提升！</p>
+        <div class="page-number">7</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>1.5 2017年：稀疏突破</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph LR
+    A[输入 x] --> B{Router}
+    B --> C[Top-K选择]
+    C --> D["Expert 2 (激活)"]
+    C --> E["Expert 5 (激活)"]
+    C --> F[...]
+
+    D --> G[激活计算]
+    E --> G
+    F -.-> H[跳过计算]
+    G --> I[输出 y]
+
+    subgraph "Shazeer 2017创新"
+        C
+        D
+        E
+        G
+    end
+
+    style D fill:#c8e6c9
+    style E fill:#c8e6c9
+    style G fill:#c8e6c9
+    style F fill:#ffcdd2
+    style H fill:#ffcdd2
+            </div>
+        </div>
+        <p><strong>历史意义</strong>：首次证明MoE可以在实践中大规模工作！达到137B参数！</p>
+        <div class="page-number">8</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>1.6 专家坍缩的正反馈循环</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TD
+    A[Expert 1 偶然表现好] --> B[获得更多 token]
+    B --> C["更多训练 -> 更强"]
+    C --> D[门控分数更高]
+    D --> E[选更多 token]
+    E --> A
+
+    F[其他专家] --> G[获得更少 token]
+    G --> H["训练不足 -> 更弱"]
+    H --> I[门控分数更低]
+    I --> J[选更少 token]
+    J --> F
+    
+    style A fill:#ffebee
+    style B fill:#ffebee
+    style C fill:#ffebee
+    style D fill:#ffebee
+    style E fill:#ffebee
+    style F fill:#e3f2fd
+    style G fill:#e3f2fd
+    style H fill:#e3f2fd
+    style I fill:#e3f2fd
+    style J fill:#e3f2fd
+            </div>
+        </div>
+        <p><strong>问题</strong>：正反馈循环导致专家坍缩，N个专家只剩1个有效！</p>
+        <div class="page-number">9</div>
+    </div>
+
+    <!-- Part 2: 数学原理 -->
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h1>Part 2: 数学原理 (12 min)</h1>
+        <div class="page-number">10</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>2.1 MoE层的数学定义</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TB
+    A[输入 x] --> B{Router}
+    B --> C[选择集合 S(x)]
+    C --> D[门控权重 g_i(x)]
+    D --> E[专家输出 E_i(x)]
+    E --> F[加权求和]
+    F --> G[输出 MoE(x)]
+
+    H[数学公式] --> I["MoE(x) = sum g_i(x) * E_i(x)"]
+
+    style H fill:#e3f2fd
+    style I fill:#e8f5e9
+            </div>
+        </div>
+        <p style="margin-top: 20px;"><strong>定义 2.1 (MoE层)</strong>：给定输入 <span style="font-family: 'Times New Roman', serif;">x</span>，MoE层的输出定义为加权求和</p>
+        <p style="margin-top: 10px; font-size: 16px; color: #666;">$$\text{MoE}(x) = \sum_{i \in \mathcal{S}(x)} g_i(x) \cdot E_i(x)$$</p>
+        <div class="page-number">11</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>2.2 稀疏门控机制</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph LR
+    A[输入 x] --> B[计算 logits]
+    B --> C[Softmax概率]
+    C --> D[Top-K选择]
+    D --> E[稀疏权重]
+    E --> F[归一化]
+
+    subgraph "稀疏门控流程"
+        B
+        C
+        D
+        E
+        F
+    end
+    
+    G[数学表达] --> H["g(x) = SparseTopK(sigma(W_g x), K)"]
+    
+    style G fill:#e3f2fd
+    style H fill:#e8f5e9
+            </div>
+        </div>
+        <p><strong>关键性质</strong>：稀疏性（只有K个非零） + 归一性（非零元素和为1）</p>
+        <div class="page-number">12</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>2.3 参数量分析：N倍参数</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TB
+    A[Dense FFN] --> B[参数量: P]
+    B --> C[计算量: C]
+
+    D[MoE FFN] --> E["参数量: N * P"]
+    E --> F["计算量: K * C"]
+
+    G[性价比分析] --> H["性价比 = (N * P) / (K * C) = N / K"]
+
+    I[示例] --> J["N=128, K=2 -> 64倍提升!"]
+
+    style A fill:#ffebee
+    style B fill:#ffebee
+    style C fill:#ffebee
+    style D fill:#c8e6c9
+    style E fill:#c8e6c9
+    style F fill:#c8e6c9
+    style G fill:#e3f2fd
+    style H fill:#e8f5e9
+    style I fill:#e3f2fd
+    style J fill:#e8f5e9
+            </div>
+        </div>
+        <p><strong>核心价值</strong>：用存储换计算，实现参数换效果</p>
+        <div class="page-number">13</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>2.4 计算量分析：K倍计算</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph LR
+    A[Dense计算] --> B["FLOPs = 2 * d_model * d_ff"]
+
+    C[MoE计算] --> D["Router: 2 * d_model * N"]
+    D --> E["专家: K * 2 * d_model * d_ff"]
+    E --> F["总计 ≈ K * FLOPs_dense"]
+    
+    G[效率比] --> H["FLOPs_moe / FLOPs_dense = K"]
+    
+    style A fill:#ffebee
+    style B fill:#ffebee
+    style C fill:#c8e6c9
+    style D fill:#c8e6c9
+    style E fill:#c8e6c9
+    style F fill:#c8e6c9
+    style G fill:#e3f2fd
+    style H fill:#e8f5e9
+            </div>
+        </div>
+        <p><strong>关键结论</strong>：参数增加N倍，计算只增加K倍，性价比提升N/K倍！</p>
+        <div class="page-number">14</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>2.5 专家专业化形成过程</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+timeline
+    title 专家专业化动态过程
+    section 阶段1
+        训练初期 : 随机路由
+        Router到Expert 1,2 : 随机token
+    section 阶段2
+        梯度更新 : 学习分化
+        Expert 1学习模式A : Expert 2学习模式B
+    section 阶段3
+        正反馈循环 : 强化分工
+        Router到Expert 1更多模式A : Router到Expert 2更多模式B
+    section 阶段4
+        专业化形成 : 稳定分工
+        Expert 1擅长模式A : Expert 2擅长模式B
+            </div>
+        </div>
+        <p><strong>理论机制</strong>：不同专家学习不同的条件分布，自然形成专业化</p>
+        <div class="page-number">15</div>
+    </div>
+
+    <!-- Part 3: 门控机制 -->
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h1>Part 3: 门控机制 (12 min)</h1>
+        <div class="page-number">16</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>3.1 专家坍缩问题</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TD
+    A[训练初期] --> B["Expert 1: 20%<br/>Expert 2: 18%<br/>Expert 3: 22%"]
+
+    C[正反馈循环开始] --> D[Expert 1 偶然表现好]
+    D --> E[获得更多 token]
+    E --> F["更多训练 -> 更强"]
+    F --> G[门控分数更高]
+    G --> H[选更多 token]
+    H --> D
+    
+    I[训练后期] --> J["Expert 1: 95%<br/>Expert 2: 3%<br/>Expert 3: 1%"]
+    
+    style B fill:#c8e6c9
+    style D fill:#ffebee
+    style E fill:#ffebee
+    style F fill:#ffebee
+    style G fill:#ffebee
+    style H fill:#ffebee
+    style J fill:#ffcdd2
+            </div>
+        </div>
+        <p><strong>结果</strong>：N个专家只剩1个有效，完全失去MoE的意义！</p>
+        <div class="page-number">17</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>3.2 Noisy Gating解决方案</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph LR
+    A[无噪声] --> B["Expert 1: 3.0<br/>Expert 2: 2.9"]
+    B --> C[总是选 Expert 1]
+    C --> D[Expert 2 饿死]
+
+    E[有噪声] --> F["Expert 1: 3.0 + noise1<br/>Expert 2: 2.9 + noise2"]
+    F --> G[有时选 Expert 2]
+    G --> H[Expert 2 存活!]
+
+    style A fill:#ffebee
+    style B fill:#ffebee
+    style C fill:#ffebee
+    style D fill:#ffcdd2
+    style E fill:#c8e6c9
+    style F fill:#c8e6c9
+    style G fill:#c8e6c9
+    style H fill:#c8e6c9
+            </div>
+        </div>
+        <p><strong>效果</strong>：打破确定性路由，促进探索，防止早期锁定</p>
+        <div class="page-number">18</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>3.3 辅助损失机制</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TB
+    A[目标] --> B[每个专家处理约 1/N 的 token]
+
+    C[定义两个统计量] --> D[Importance_i: 平均门控权重]
+    C --> E[Load_i: 被选中频率]
+    
+    F[辅助损失公式] --> G["L_aux = N * sum(Importance_i * Load_i)"]
+    
+    H[数学性质] --> I[均匀分布: L_aux = K (最小值)]
+    H --> J[完全集中: L_aux = N (最大值)]
+    
+    style A fill:#e3f2fd
+    style B fill:#e8f5e9
+    style C fill:#e3f2fd
+    style D fill:#e8f5e9
+    style E fill:#e8f5e9
+    style F fill:#e3f2fd
+    style G fill:#e8f5e9
+    style H fill:#e3f2fd
+    style I fill:#c8e6c9
+    style J fill:#ffcdd2
+            </div>
+        </div>
+        <p style="margin-top: 20px;"><strong>原理</strong>：优化过程自动推动分布向均匀分布靠近</p>
+        <p style="margin-top: 10px; font-size: 16px; color: #666;">辅助损失函数最小化时，各专家的负载分布趋于均匀</p>
+        <div class="page-number">19</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>3.4 Expert Capacity机制</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TB
+    A[问题场景] --> B[8 tokens, 4 experts, Top-1]
+    B --> C[路由: E1,E1,E1,E1,E1,E2,E3,E3]
+    C --> D["Expert 1: 5 tokens -> 过载!"]
+    C --> E["Expert 4: 0 tokens -> 空闲!"]
+
+    F[Capacity解决方案] --> G["capacity = (tokens/experts) * factor"]
+    G --> H["= (8/4) * 1.25 = 2.5 -> 3"]
+    H --> I[规则: 每个专家最多处理3个token]
+    I --> J[超出部分: 直接跳过]
+
+    style A fill:#ffebee
+    style B fill:#ffebee
+    style C fill:#ffebee
+    style D fill:#ffcdd2
+    style E fill:#ffcdd2
+    style F fill:#c8e6c9
+    style G fill:#c8e6c9
+    style H fill:#c8e6c9
+    style I fill:#c8e6c9
+    style J fill:#c8e6c9
+            </div>
+        </div>
+        <p><strong>权衡</strong>：Factor=1.25时Token丢弃率约5%，推荐使用</p>
+        <div class="page-number">20</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>3.5 门控机制总结：四层防护</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TB
+    A[门控机制四层防护] --> B[第一层: Noisy Gating]
+    A --> C[第二层: Auxiliary Loss]
+    A --> D[第三层: Expert Capacity]
+    A --> E[第四层: Router Z-Loss]
+
+    B --> F["打破确定性路由<br/>促进探索"]
+    C --> G["软约束负载均衡<br/>推动均匀分布"]
+    D --> H["硬约束负载上限<br/>保证计算可分配"]
+    E --> I["数值稳定性<br/>防止logits爆炸"]
+    
+    style A fill:#e3f2fd
+    style B fill:#c8e6c9
+    style C fill:#c8e6c9
+    style D fill:#c8e6c9
+    style E fill:#c8e6c9
+    style F fill:#e8f5e9
+    style G fill:#e8f5e9
+    style H fill:#e8f5e9
+    style I fill:#e8f5e9
+            </div>
+        </div>
+        <p><strong>设计哲学</strong>：软约束推动均衡，硬约束兜底保障</p>
+        <div class="page-number">21</div>
+    </div>
+
+    <!-- Part 4: 工程实现 -->
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h1>Part 4: 工程实现 (10 min)</h1>
+        <div class="page-number">22</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>4.1 MoE层完整实现架构</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TB
+    A["输入 x: [B, S, D]"] --> B["展平: [B*S, D]"]
+    B --> C{Router计算}
+    C --> D[logits = x @ W_g]
+    D --> E[probs = softmax(logits)]
+    E --> F[Top-K选择]
+    F --> G[专家索引 indices]
+    F --> H[权重 probs]
+
+    G --> I[按专家分组]
+    H --> I
+    I --> J[批量处理]
+    J --> K[收集结果]
+    K --> L[加权求和]
+    L --> M["输出: [B, S, D]"]
+
+    style C fill:#e3f2fd
+    style I fill:#c8e6c9
+    style J fill:#c8e6c9
+    style K fill:#c8e6c9
+    style L fill:#c8e6c9
+            </div>
+        </div>
+        <p style="margin-top: 20px;"><strong>关键优化</strong>：避免token级别循环，改用专家级别批量处理</p>
+        <p style="margin-top: 10px; font-size: 16px; color: #666;">将相同专家的token分组后批量计算，大幅提升计算效率</p>
+        <div class="page-number">23</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>4.2 分布式MoE：Expert Parallelism</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TB
+    A[输入] --> B["Router计算<br/>所有GPU并行"]
+    B --> C["All-to-All发送<br/>按专家分配token"]
+    C --> D[GPU 0: Expert 0-7]
+    C --> E[GPU 1: Expert 8-15]
+    C --> F[GPU 2: Expert 16-23]
+    C --> G[GPU 7: Expert 56-63]
+
+    D --> H[本地计算]
+    E --> H
+    F --> H
+    G --> H
+    H --> I["All-to-All返回<br/>收集结果"]
+    I --> J[输出]
+    
+    subgraph "配置: 8 GPUs, 64 experts"
+        D
+        E
+        F
+        G
+    end
+    
+    style B fill:#e3f2fd
+    style C fill:#e3f2fd
+    style H fill:#c8e6c9
+    style I fill:#e3f2fd
+            </div>
+        </div>
+        <p><strong>通信模式</strong>：All-to-All发送 + 本地计算 + All-to-All返回</p>
+        <div class="page-number">24</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>4.3 通信开销分析</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph LR
+    A[数据并行] --> B["通信量: 2P<br/>All-Reduce梯度"]
+    B --> C[适用: 小模型]
+
+    D[Expert并行] --> E["通信量: BS*d<br/>All-to-All"]
+    E --> F[适用: MoE模型]
+
+    G[张量并行] --> H[通信量: 每层多次All-Reduce]
+    H --> I[适用: 超大层]
+
+    style A fill:#ffebee
+    style B fill:#ffebee
+    style C fill:#ffebee
+    style D fill:#c8e6c9
+    style E fill:#c8e6c9
+    style F fill:#c8e6c9
+    style G fill:#ffebee
+    style H fill:#ffebee
+    style I fill:#ffebee
+            </div>
+        </div>
+        <p><strong>关键观察</strong>：Expert Parallelism通信量与专家数N和Top-K无关！</p>
+        <div class="page-number">25</div>
+    </div>
+
+    <!-- Part 5: 现代架构案例 -->
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h1>Part 5: 现代架构案例 (6 min)</h1>
+        <div class="page-number">26</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>5.1 Mixtral 8x7B架构</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TB
+    A[输入 x] --> B["Transformer Layer * 32"]
+    B --> C["Self-Attention<br/>GQA: 32 KV heads"]
+    C --> D[MoE FFN层]
+    D --> E[Expert 1]
+    D --> F[Expert 2]
+    D --> G[...]
+    D --> H[Expert 8]
+
+    E --> I[Router选择 Top-2激活]
+    F --> I
+    G --> I
+    H --> I
+    I --> J[输出 y]
+    
+    subgraph "配置参数"
+        K[d_model=4096]
+        L[d_ff=14336]
+        M[num_layers=32]
+        N[num_experts=8]
+        O[top_k=2]
+        P[总参数=47B]
+        Q[激活参数=13B]
+    end
+    
+    style D fill:#c8e6c9
+    style E fill:#c8e6c9
+    style F fill:#c8e6c9
+    style H fill:#c8e6c9
+    style I fill:#c8e6c9
+            </div>
+        </div>
+        <p><strong>工业标杆</strong>：质量接近70B，速度接近7B！</p>
+        <div class="page-number">27</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>5.2 DeepSeek-MoE创新设计</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TB
+    A[传统MoE] --> B["8个大专家<br/>各约7B参数"]
+    B --> C[Top-2激活]
+
+    D[DeepSeek创新] --> E["64个小专家<br/>各约0.9B参数"]
+    E --> F[Top-6激活]
+    E --> G[共享专家<br/>始终激活]
+
+    H[优势] --> I[更细粒度路由组合]
+    H --> J[更灵活的专业化]
+    H --> K[解决Cold Start问题]
+
+    style A fill:#ffebee
+    style B fill:#ffebee
+    style C fill:#ffebee
+    style D fill:#c8e6c9
+    style E fill:#c8e6c9
+    style F fill:#c8e6c9
+    style G fill:#c8e6c9
+    style H fill:#e3f2fd
+    style I fill:#e8f5e9
+    style J fill:#e8f5e9
+    style K fill:#e8f5e9
+            </div>
+        </div>
+        <p><strong>两大创新</strong>：细粒度专家 + 共享专家机制</p>
+        <div class="page-number">28</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>5.3 性能对比分析</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+pie title 模型性能对比
+    "LLaMA-2 7B" : 0
+    "LLaMA-2 70B" : 40
+    "Mixtral 8x7B" : 35
+    "DeepSeek-MoE" : 50
+            </div>
+        </div>
+        <p><strong>实际价值</strong>：用2-3倍推理成本，获得接近10倍参数模型的效果！</p>
+        <div class="page-number">29</div>
+    </div>
+
+    <!-- Part 6: 总结与展望 -->
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h1>Part 6: 总结与展望 (5 min)</h1>
+        <div class="page-number">30</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>6.1 MoE技术演进因果链</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph LR
+    A["1991: 概念诞生"] --> B["问题: 计算效率为零"]
+    B --> C["2017: 稀疏突破"]
+    C --> D["解决: 效率/坍缩/负载均衡"]
+    D --> E["问题: 规模受限"]
+    E --> F["2021: 规模扩展"]
+    F --> G["解决: 万亿参数"]
+    G --> H["问题: 效果受限/不稳定"]
+    H --> I["2022: 训练稳定"]
+    I --> J["解决: 数值稳定性"]
+    J --> K["2024: 工业落地"]
+    K --> L["达成: 效果与效率平衡"]
+
+    style A fill:#e3f2fd
+    style C fill:#c8e6c9
+    style F fill:#c8e6c9
+    style I fill:#c8e6c9
+    style K fill:#c8e6c9
+            </div>
+        </div>
+        <p><strong>演进主线</strong>：效率 -> 规模 -> 稳定 -> 实用</p>
+        <div class="page-number">31</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>6.2 核心要点总结</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+mindmap
+  root((MoE核心价值))
+    效率
+      N倍参数
+      K倍计算
+      N/K倍性价比
+    负载均衡
+      Noisy Gating
+      Auxiliary Loss
+      Expert Capacity
+      Router Z-Loss
+    专业化
+      自动形成
+      无需预定义
+      条件分布学习
+    部署
+      全量加载
+      内存瓶颈
+      分布式推理
+            </div>
+        </div>
+        <p><strong>一句话总结</strong>：MoE通过稀疏激活打破参数-计算线性绑定</p>
+        <div class="page-number">32</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>6.3 技术选型建议</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TD
+    A[资源有限] --> B[Dense模型]
+    C[追求容量] --> D[MoE (8-64专家)]
+    E[分布式推理] --> F[Expert Parallelism]
+    G[内存紧张] --> H[专家量化/共享]
+
+    style B fill:#ffebee
+    style D fill:#c8e6c9
+    style F fill:#c8e6c9
+    style H fill:#c8e6c9
+            </div>
+        </div>
+        <p style="margin-top: 20px;"><strong>实用建议</strong>：根据具体场景选择最合适的方案</p>
+        <ul style="margin-top: 10px; font-size: 16px; color: #666; padding-left: 30px;">
+            <li>资源有限：使用Dense模型</li>
+            <li>追求容量：使用MoE (8-64专家)</li>
+            <li>分布式推理：使用Expert Parallelism</li>
+            <li>内存紧张：使用专家量化/共享</li>
+        </ul>
+        <div class="page-number">33</div>
+    </div>
+
+    <div class="page">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h2>6.4 开放问题与未来方向</h2>
+        <div class="mermaid-container">
+            <div class="mermaid">
+graph TB
+    A[开放问题] --> B[最优专家数?]
+    A --> C[专业化机制?]
+    A --> D[稀疏训练稳定性?]
+    A --> E[与其他技术结合?]
+
+    F[未来方向] --> G[MoE + LoRA]
+    F --> H[MoE + 量化]
+    F --> I[动态专家数]
+    F --> J[多模态MoE]
+
+    style A fill:#e3f2fd
+    style B fill:#ffebee
+    style C fill:#ffebee
+    style D fill:#ffebee
+    style E fill:#ffebee
+    style F fill:#e3f2fd
+    style G fill:#c8e6c9
+    style H fill:#c8e6c9
+    style I fill:#c8e6c9
+    style J fill:#c8e6c9
+            </div>
+        </div>
+        <p><strong>研究活跃</strong>：MoE技术仍在快速发展中</p>
+        <div class="page-number">34</div>
+    </div>
+
+    <!-- 结束页 -->
+    <div class="page lead">
+        <div class="header-info">MoE深度解析 | Mermaid图表优化版</div>
+        <h1 style="border: none; font-size: 48px; margin-bottom: 30px;">感谢聆听！</h1>
+        <h2 style="border: none; font-size: 36px; color: #666; margin-top: 40px;">MoE深度解析 - 60分钟完整版</h2>
+        <p style="font-size: 28px; margin-top: 60px;"><strong>核心收获</strong>：稀疏激活让"大模型"不再意味着"高成本"</p>
+        <br>
+        <p style="font-size: 24px; color: #888; margin-top: 60px;"><strong>理解历史，才能看清未来</strong></p>
+        <div class="page-number">35</div>
+    </div>
+
+    <script>
+        // 初始化 Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            themeVariables: {
+                primaryColor: '#3498db',
+                primaryTextColor: '#2c3e50',
+                primaryBorderColor: '#2980b9',
+                lineColor: '#34495e',
+                secondaryColor: '#ecf0f1',
+                tertiaryColor: '#f8f9fa'
+            }
+        });
+
+    </script>
+</body>
+</html>

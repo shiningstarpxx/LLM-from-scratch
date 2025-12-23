@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoE深度解析 - 60分钟完整版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        .presentation {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .slide {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h1 {
+            color: #1a5f7a;
+            font-size: 44px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-size: 36px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        h3 {
+            color: #34495e;
+            font-size: 28px;
+            margin: 20px 0 15px 0;
+            font-weight: 500;
+        }
+
+        .ascii-diagram {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.3;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .code-block {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .highlight-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .key-point {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+
+        .warning-box {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .math-box {
+            background: #e7f3ff;
+            border-left: 5px solid #0066cc;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Cambria Math', serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+
+        th {
+            background: #3498db;
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .slide-number {
+            color: #6c757d;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .slide-title {
+            color: #2c3e50;
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .center-content {
+            text-align: center;
+        }
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .agenda-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .agenda-time {
+            background: #3498db;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-right: 15px;
+            font-weight: 600;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .agenda-content {
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 20px;
+                min-height: auto;
+            }
+
+            h1 { font-size: 32px; }
+            h2 { font-size: 28px; }
+            h3 { font-size: 24px; }
+
+            .two-columns {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .ascii-diagram {
+                font-size: 12px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+
+        <!-- 封面页 -->
+        <div class="slide">
+            <div class="center-content">
+                <h1>Mixture of Experts 深度解析</h1>
+                <p style="font-size: 28px; color: #666; margin: 20px 0;">从数学原理到工程实践的完整技术旅程</p>
+                <div style="margin: 40px 0;">
+                    <p style="font-size: 22px; color: #888;">分享人：深度学习系统研究组</p>
+                    <p style="font-size: 20px; color: #999;">时长：60分钟 | 2025年</p>
+                </div>
+                <div class="key-point" style="max-width: 600px; margin: 0 auto;">
+                    <strong>核心主线：</strong>每个时代解决了什么问题？技术如何一步步演进？
+                </div>
+            </div>
+        </div>
+
+        <!-- 议程页 -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">Part 1</div>
+                <div class="slide-title">议程：以问题驱动的历史视角</div>
+            </div>
+
+            <div class="slide-content">
+                <div class="agenda-item">
+                    <div class="agenda-time">5 min</div>
+                    <div class="agenda-content">
+                        <strong>背景与动机</strong> - 大模型的根本困境
+                    </div>
+                </div>
+
+                <div class="agenda-item">
+                    <div class="agenda-time">12 min</div>
+                    <div class="agenda-content">
+                        <strong>历史演进</strong> - 1991→2017→2021→2024
+                    </div>
+                </div>
+
+                <div class="agenda-item">
+                    <div class="agenda-time">12 min</div>
+                    <div class="agenda-content">
+                        <strong>数学原理</strong> - 稀疏计算与性价比分析
+                    </div>
+                </div>
+
+                <div class="agenda-item">
+                    <div class="agenda-time">12 min</div>
+                    <div class="agenda-content">
+                        <strong>门控机制</strong> - 解决专家坍缩的四层防护
+                    </div>
+                </div>
+
+                <div class="agenda-item">
+                    <div class="agenda-time">10 min</div>
+                    <div class="agenda-content">
+                        <strong>工程实现</strong> - 高效计算与分布式训练
+                    </div>
+                </div>
+
+                <div class="agenda-item">
+                    <div class="agenda-time">6 min</div>
+                    <div class="agenda-content">
+                        <strong>现代架构</strong> - Mixtral与DeepSeek案例分析
+                    </div>
+                </div>
+
+                <div class="agenda-item">
+                    <div class="agenda-time">3 min</div>
+                    <div class="agenda-content">
+                        <strong>总结</strong> - 技术演进与未来展望
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 1: 大模型困境 -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">Part 1.1</div>
+                <div class="slide-title">大模型的根本困境</div>
+            </div>
+
+            <div class="slide-content">
+                <div class="highlight-box">
+                    <strong>核心问题：</strong>能否打破参数与计算的线性绑定？增加参数但不增加计算？
+                </div>
+
+                <div class="ascii-diagram">
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Dense 模型的宿命                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│    参数量 ═══════════════════════════════════════► 计算量                │
+│       ↑                                               ↑                   │
+│       │              线性绑定关系 !!!                 │                   │
+│       │                                               │                   │
+│    想要更强 ════════════════════════════════════► 成本更高               │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│   参数量        计算量        训练成本        推理成本        代表模型      │
+│   ────────────────────────────────────────────────────────────────────      │
+│   7B           1x            $10K           1x              LLaMA-7B       │
+│   70B          10x           $1M            10x             LLaMA-70B      │
+│   175B         25x           $5M            25x             GPT-3          │
+│   700B         100x          $50M           100x            PaLM           │
+└─────────────────────────────────────────────────────────────────────────────┘
+                </div>
+
+                <div class="key-point">
+                    MoE的答案：稀疏激活 - 用存储换计算，实现参数换效果！
+                </div>
+            </div>
+        </div>
+
+        <!-- MoE核心洞察 -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">Part 1.2</div>
+                <div class="slide-title">MoE的核心洞察</div>
+            </div>
+
+            <div class="slide-content">
+                <div class="ascii-diagram">
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     MoE 的核心洞察                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│        N个专家                    只激活K个                                │
+│   ┌───┬───┬───┬───┐              ┌───┐   ┌───┐                            │
+│   │ E1│ E2│ E3│...│    ────►     │ E2│ + │ E5│                            │
+│   └───┴───┴───┴───┘              └───┘   └───┘                            │
+│         存储全部                   计算少量                                 │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   参数量 = N × 单专家参数        （N倍参数，如128倍）                       │
+│   计算量 = K × 单专家计算        （K倍计算，如2倍）                         │
+│   性价比 = N / K                 （64倍提升！）                             │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                </div>
+
+                <div class="math-box">
+                    <strong>数学表达：</strong>
+                    $$\text{性价比} = \frac{\text{参数量}}{\text{计算量}} = \frac{N \times P}{K \times C} = \frac{N}{K}$$
+                </div>
+            </div>
+        </div>
+
+        <!-- 继续添加其他页面... -->
+
+        <div class="slide">
+            <div class="center-content">
+                <h2>文档预览</h2>
+                <p style="font-size: 20px; margin: 20px 0;">这是HTML格式的预览版本</p>
+                <p style="color: #666;">完整文档包含60+页详细内容</p>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
